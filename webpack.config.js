@@ -63,7 +63,7 @@ module.exports = {
       {
         from: 'dist/*',
         // to: path.resolve(__dirname, '..', 'pkue/node_modules/vue-pku/'),
-        to: path.resolve(__dirname, '..', 'donCheck/node_modules/don-qa/'),
+        to: path.resolve(__dirname, '..', 'checksystem/node_modules/don-qa/'),
         force: true
       }
     ], {

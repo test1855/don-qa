@@ -29,6 +29,12 @@
             :label="selectID(id)">
             <pku-input class="question-input" placeholder="选项序号" @change="onSelectEventHandler($event, id, 'sn')"></pku-input>
             <pku-input class="question-input" placeholder="选项名称" @change="onSelectEventHandler($event, id, 'val')"></pku-input>
+            <pku-switch 
+              class="switch-online"
+              ableText="无"
+              disableText="请注明"
+              :message="selectType(id) + '#' + new Date().valueOf()"
+              @callback="onSelectEventHandler($event, id, 'checktype')"></pku-switch>
           </don-qa-question-wrap>
         </transition-group>
         <don-qa-question-wrap>
@@ -83,10 +89,11 @@ export default {
     return {
       list: ['问题设置'],
       selects: [
-        { sn: '', val: ''}
+        { sn: '', val: '', checktype: ''}
       ],
       inputSn: undefined,
-      inputTitle: undefined
+      inputTitle: undefined,
+      selecttype: []
     }
   },
   mounted () {
@@ -119,10 +126,19 @@ export default {
     selectID (val) {
       return '选项' + String(val + 1)
     },
+    selectType (val) {
+      if (val < this.selecttype.length) {
+        return this.selecttype[val]
+      } else {
+        this.selecttype.push(true)
+        return this.selecttype[val]
+      }
+    },
     onClickEventHadnler () {
       this.selects.push({
         sn: '',
-        val: ''
+        val: '',
+        checktype: ''
       })
     },
     onSnEventHandler (val) {
@@ -132,20 +148,29 @@ export default {
       this.inputTitle = val
     },
     onSelectEventHandler (val, index, type) {
+      if (type === 'checktype') {
+        this.selecttype[index] = val
+      }
       this.selects[index][type] = val
     },
     onSubmitEventHandler () {
     //   let content = this.title.filter(item => item.questionId === this.select)
       let value = []
       let sns = []
+      let ctype = []
       this.selects.forEach(item => {
         console.log(item)
         value.push(item.val)
         sns.push(item.sn)
+        if (item.checktype === '') {
+          item.checktype = true
+        }
+        ctype.push(item.checktype)
       })
       this.$emit('callback', {
         'QuesOptionValues': sns.toString(),
         'QuesOptionTexts': value.toString(),
+        'optionWithoutInput': ctype.toString(),
         // 'questionID': this.select,
         'questionContent': this.inputTitle,
         'questionSn': this.inputSn,

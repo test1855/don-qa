@@ -33,6 +33,12 @@
         :key="id"
         :label="logicid(id)"
         :inline="true">
+         <pku-switch 
+          class="switch-online"
+          ableText="核查系统"
+          disableText="调查系统"
+          :message="checktype + '#' + new Date().valueOf()"
+          @callback="onSwitchEventHandler"></pku-switch>
         <pku-select
           class="wrap-logic"
           label="如果"
@@ -148,7 +154,8 @@ export default {
         ]
       },
       from: undefined,
-      des: undefined
+      des: undefined,
+      checktype: true
     }
   },
   mounted () {
@@ -200,6 +207,10 @@ export default {
     },
     onSaveEventHandler () {
       this.$emit('save', { from: this.from, des: this.des, logics: this.logics })
+    },
+    onSwitchEventHandler (val) {
+      this.checktype = val  //true->check, false->survey
+      this.$emit('switch', { checktype: this.checktype })
     }
   }
 }
