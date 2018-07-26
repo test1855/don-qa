@@ -221,7 +221,7 @@ export default {
       if (val) {
         this.question = val
         this.questionID++
-        this.$refs.host.value = '访员是否提问了 ' + this.$refs.host.value + ' 一题相关内容？'
+        this.$refs.host.value = this.$refs.host.value + ' 一题，答案是否一致？'
       }
     },
     onSubmitEventHandler () {

@@ -32,7 +32,7 @@
             <pku-switch 
               class="switch-online"
               ableText="无"
-              disableText="请注明"
+              disableText="其他请注明"
               :message="selectType(id) + '#' + new Date().valueOf()"
               @callback="onSelectEventHandler($event, id, 'checktype')"></pku-switch>
           </don-qa-question-wrap>
@@ -55,6 +55,9 @@
         exportKey="value"
         :disabled="false"
         :message="options"></pku-radio>
+    <div class="don-qa-question-select" v-for="option in options">
+      <pku-input class="wrap-input" :disabled="!option.quesOptionsWithInput"></pku-input>
+    </div>
   </div>
 </template>
 
@@ -79,8 +82,8 @@ export default {
       type: Array,
       default () {
         return [
-          { name: '是', value: 1 },
-          { name: '无法判断', value: 9 }
+          { name: '是', value: 1, quesOptionsWithInput: false },
+          { name: '无法判断', value: 9, quesOptionsWithInput: false }
         ]
       }
     }
