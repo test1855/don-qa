@@ -20,7 +20,7 @@
       <component
         class="wrap-select"
         :is="reWriteName"
-        selected="受访者第一次给出的答案是否准确？"
+        selected="访员是否至少追问一次？"
         importKey="quesText"
         exportKey="questionId"
         ref="host"
@@ -221,7 +221,7 @@ export default {
       if (val) {
         this.question = val
         this.questionID++
-        this.$refs.host.value = this.$refs.host.value + '一题,受访者第一次给出的答案是否准确？'
+        this.$refs.host.value = this.$refs.host.value + '一题,访员是否至少追问一次？'
       }
     },
     onSubmitEventHandler () {

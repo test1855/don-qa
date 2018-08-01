@@ -20,7 +20,7 @@
       <component
         class="wrap-select"
         :is="reWriteName"
-        selected="下面这一题，受访者给出的答案是什么？"
+        selected="下面这一题，受访者给出的答案是否一致？"
         importKey="quesText"
         exportKey="questionId"
         ref="host"

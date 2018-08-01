@@ -1,10 +1,17 @@
 <template>
   <div class="qa-answer-fill">
+    <don-qa-question-wrap>
+      <pku-button 
+        class="btn-default"
+        value="获取录音时间"
+        @callback="onPlayEventHandler"></pku-button>
+    </don-qa-question-wrap>
     <div v-for="(group, index1) in options">
       <div class="qa-answer-wrapper" v-for="(item, index2) in group">
         <div class="qa-answer-title">
           {{item.quesSn}}: <span v-html="splitTitle(item)"></span>
           <audio  class="audio"
+                  ref="audio"
                   :src="eachFile(item)"
                   v-if="item.quesType === '3000' || item.quesType === '3001' || item.quesType === '3002' || item.quesType === '3003' || item.quesType === '3004' || item.quesType === '3005' || item.quesType === '3006' || item.quesType === '3007' || item.quesType === '3008' || item.quesType === '3009'"
                   controls="controls">Your browser does not support the audio element.</audio>
@@ -114,12 +121,17 @@ export default {
       })
       let tmp = JSON.parse(this.content)
       let arr = tmp.filter(item => Number(item.indexForAns) === len)
+      console.log('arr ', arr, arr.length)
       if (arr) {
         if (this.options[index1][index2].quesType === '0600') {
-          // console.log()
-          // console.log(len, arr, this.options[0][len])
-          arr[0].recomStartNum = this.options[0][len].recomStartNum
-          arr[0].valueCount = this.options[0][len].valueCount
+          // console.log('eachRes0600 ', index1, index2)
+          // console.log('eachRes0600111 ', len, arr, this.options[0][len])
+          if(arr[0]) {
+            console.log('arr[0] ', arr[0])
+            arr[0].recomStartNum = this.options[0][len].recomStartNum
+            arr[0].valueCount = this.options[0][len].valueCount
+            console.log('arr[0]111 ', arr[0])
+          }
         }
         return arr[0]
       } else {
@@ -127,6 +139,8 @@ export default {
       }
     },
     eachFile (item) {
+      console.log('audio', this.audio)
+      // return this.audio + '_4101021101_1532335946162(0).mp3'
       let tmp = item.quesText.split('____________')
       if (tmp.length > 1) {
         tmp = tmp[1]
@@ -150,6 +164,19 @@ export default {
     },
     onPrevEventHandler () {
       this.$emit('prev')
+    },
+    onPlayEventHandler () {
+      let tmp = JSON.parse(this.groups).concat()
+      let grouplength = 0
+      tmp.forEach(item => {
+        item.forEach((val, idx) => {
+          if(val.startTimestamp !== undefined) {
+            this.$refs.audio[grouplength + idx].currentTime = val.startTimestamp
+            // this.$refs.audio[grouplength + idx].duration = val.timeStamp - val.startTimestamp
+          }
+        })
+        grouplength += item.length
+      })
     },
     onSubmitEventHandler () {
       // let len = this.$refs.res.length
@@ -184,7 +211,6 @@ export default {
         let tmp = JSON.parse(this.groups).concat()
         let count = 0
         let res = []
-        console.log(tmp)
         tmp.forEach(item => {
           item.forEach(val => {
             val.questionID = val.quesId
@@ -204,7 +230,6 @@ export default {
             delete val.rowOptions
             delete val.rowOrders
             if (val.quesType === '0001') {
-              console.log('9991', this.$refs.res[count].$children[0])
               let num = this.$refs.res[count].$children[0].$data.value
               val.a = [val.optionOrders[num]]
               val.b = [val.quesOptions[num]]
@@ -214,19 +239,31 @@ export default {
               val.quesOptions = val.b.concat()
               delete val.a
               delete val.b
-              console.log('0001select', num, val)
+              let inputtext = []
+              val.quesOptionsWithInput.forEach((v, id) => {
+                if (v === true) {
+                  val.optionOrders.forEach((x) => {
+                    let numx = Number(x)
+                    inputtext.push(this.$refs.res[count].$children[numx+1].value)
+                  })
+                } else {
+                  inputtext.push(false)
+                }
+              })
+              val.optionsInput = inputtext
+              console.log(val.quesType, val, val.quesOptions)
               res.push(val)
             } else if (val.quesType === '0100') {
-              console.log('9991', this.$refs.res[count].$children[0])
               let num = this.$refs.res[count].$children[0].$data.value
               // delete val.optionOrders
               val.optionOrders = ['0']
               // delete val.quesOptions
               val.quesOptions = [num]
               res.push(val)
+              console.log(val.quesType, val, val.quesOptions)
             } else if (val.quesType === '0102') {
             } else if (val.quesType === '0600' || val.quesType === '0601') {
-              console.log(this)
+              console.log('0600||0601', this, this.$refs.res[count], this.$refs.res[count].$children[0])
               let num = this.$refs.res[count].$children[0].voidStart + this.$refs.res[count].$children[0].nowValue
               delete val.optionOrders
               val.optionOrders = ['0']
@@ -243,11 +280,13 @@ export default {
               val.quesOptions = val.b.concat()
               delete val.a
               delete val.b
+              console.log(val.quesType, val, val.quesOptions)
               res.push(val)
             }
             count++
           })
         })
+        console.log('answerStr ', res)
         this.$emit("callback", {
           answersStr: res
         })
@@ -280,7 +319,7 @@ export default {
 }
 .qa-answer-title {
   background-color: #f5f7fa;
-  // color: #ffffff;
+  /* color: #ffffff; */
   padding: 10px 20px;
   font-size: 16px;
   line-height: 24px;
@@ -299,5 +338,9 @@ export default {
   bottom: 30px;
   right: 20px;
   display: inline-block;
+}
+.btn-default {
+  margin: 0px 0 20px;
+  text-align: center;
 }
 </style>

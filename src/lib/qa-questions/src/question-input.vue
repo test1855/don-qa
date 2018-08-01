@@ -116,6 +116,7 @@ export default {
     }
   },
   mounted () {
+    console.log("debug ", this)
     if (this.fill && this.res) {
       // console.log(this)
       this.$children[0].$data.value = this.res.quesOptions[0]
@@ -134,9 +135,11 @@ export default {
     // 你截图部分的是文本化的显示。原系统是用onclick事件做的。
     onSnEventHandler (val) {
       this.inputSn = val
+      console.log('Sn', this.inputSn, (!this.inputSn || !this.inputTitle))
     },
     onTitleEventHandler (val) {
       this.inputTitle = val
+      console.log('Title', this.inputTitle, (!this.inputSn || !this.inputTitle))
     },
     onMaxEventHandler (val) {
       this.inputMax = val

@@ -135,6 +135,7 @@ export default {
     }
   },
   mounted () {
+    console.log("debug", this)
     if (this.fill && this.res) {
       this.res.quesOptions.forEach((item, index) => {
         if (item !== null) {

@@ -1,13 +1,38 @@
 <template>
   <div class="don-qa-question-select" v-if="!fill">
-    <pku-tab
-      :list="list">
-      <div slot="slot_0">
+    <!-- <pku-tab
+      :list="list"> -->
+      <!-- <div slot="slot_0"> -->
         <don-qa-question-wrap label="题目序号" v-if="!fill" ref="t1">
           <pku-input
             class="wrap-input"
             ref="input"
             @change="onSnEventHandler"></pku-input>
+        </don-qa-question-wrap>
+        <don-qa-question-wrap label="问题组">
+          <pku-select
+            class="wrap-select"
+            selected="选择问题组"
+            ref="group"
+            importKey="quesText"
+            exportKey="questionId"
+            :list="array"
+            @callback="onGroupEventHandler"></pku-select>
+        </don-qa-question-wrap>
+        <don-qa-question-wrap label="题干">
+          <component
+            class="wrap-select"
+            selected="选择问题"
+            :is="reWriteName"
+            importKey="quesText"
+            exportKey="questionId"
+            ref="host"
+            :style="{width: reWrite ? '80%' : 'unset'}"
+            :list="questions"
+            :html="true"
+            @callback="onQuestionEventHandler">
+          </component>
+          <pku-edit v-if="opt || (reWrite && this.question )" :showFunc="showFunc" :cancelFunc="cancelFunc" :submitFunc="submitFunc" ref="edit"></pku-edit>
         </don-qa-question-wrap>
         <don-qa-question-wrap label="题目标题" v-if="!fill" ref="t2">
           <pku-input
@@ -45,9 +70,9 @@
             :disabled="!inputSn"
             @callback="onSubmitEventHandler"></pku-button>
         </don-qa-question-wrap>
-      </div>
-      <div slot="slot_1"></div>
-    </pku-tab>
+      <!-- </div> -->
+      <!-- <div slot="slot_1"></div> -->
+    <!-- </pku-tab> -->
   </div>
   <div class="don-qa-question-select" v-else>
      <pku-radio
@@ -86,6 +111,22 @@ export default {
           { name: '无法判断', value: 9, quesOptionsWithInput: false }
         ]
       }
+    },
+    reWrite: {
+      type: Boolean,
+      default: false
+    },
+    array: {
+      type: Array,
+      default () {
+        return ['题目1', '题目2', '题目3']
+      }
+    },
+    questions: {
+      type: Array,
+      default () {
+        return ['题目1', '题目2', '题目3']
+      }
     }
   },
   data () {
@@ -96,10 +137,13 @@ export default {
       ],
       inputSn: undefined,
       inputTitle: undefined,
-      selecttype: []
+      selecttype: [],
+      reWriteName: 'pkuSelect',
+      tmpSelected: ''
     }
   },
   mounted () {
+    console.log("debug select", this)
     if (this.fill && this.res) {
       this.res.quesOptions.forEach((item, index) => {
         if (item !== null) {
@@ -123,6 +167,30 @@ export default {
           this.$refs.t3.$children[id].$children[1].$data.value = this.opt.quesOptionTexts[id]
         })
       })
+    }
+  },
+  watch: {
+    array (val) {
+      console.log('opt', this.opt, val)
+      if (this.opt) {
+        let tmp = val.filter(item => item.questionId === this.opt.relatedQuesGroupID)
+        this.question = this.opt.quesId
+        this.$refs.input.value = this.opt.quesSn
+        this.$emit('groupChange', this.opt.relatedQuesGroupID)
+        this.$refs.host.value = this.opt.quesText.split('____________')[0]
+        this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
+      }
+    },
+    opt (val) {
+      console.log('opt1', this.opt, val)
+      if (this.array) {
+        let tmp = this.array.filter(item => item.questionId === this.opt.relatedQuesGroupID)
+        this.question = this.opt.quesId
+        this.$refs.input.value = this.opt.quesSn
+        this.$emit('groupChange', this.opt.relatedQuesGroupID)
+        this.$refs.host.value = this.opt.quesText.split('____________')[0]
+        this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
+      }
     }
   },
   methods: {
@@ -156,6 +224,74 @@ export default {
       }
       this.selects[index][type] = val
     },
+    showFunc () {
+      this.tmpSelected = this.$refs.host.value
+      this.reWriteName = 'pkuInput'
+      this.$nextTick(() => {
+        if (this.opt) {
+          this.$refs.host.value = this.tmpSelected
+        } else {
+          // let tmp = this.questions.filter(item => item.questionId === this.question)
+          // this.$refs.host.value = '访员是否提问了 ' + tmp[0].quesText + ' 一题相关内容？'
+          this.$refs.host.value = this.tmpSelected
+        }
+      })
+    },
+    submitFunc () {
+      let title = this.$refs.host.value
+      this.reWriteName = 'pkuSelect'
+      this.$nextTick(() => {
+        if (this.opt) {
+          this.$refs.host.value = title
+        } else {
+          this.$refs.host.value = title
+          // let tmp = this.questions.filter(item => item.questionId === this.question)
+          // this.$refs.host.value = '访员是否提问了 ' + tmp[0].quesText + ' 一题相关内容？'
+        }
+      })
+      this.tmpSelected = ''
+    },
+    cancelFunc () {
+      this.reWriteName = 'pkuSelect'
+      this.$nextTick(() => {
+        if (this.opt) {
+          // this.$refs.host.value = this.opt.quesText.split('____________')[0]
+          this.$refs.host.value = this.tmpSelected
+        } else {
+          // let tmp = this.questions.filter(item => item.questionId === this.question)
+          // this.$refs.host.value = '访员是否提问了 ' + tmp[0].quesText + ' 一题相关内容？' || '访员是否提问了下面这一题相关内容？'
+          this.$refs.host.value = this.tmpSelected
+        }
+      })
+    },
+    onGroupEventHandler (val) {
+      if (val) {
+        this.group = val
+        this.groupID++
+        if (this.reWrite) {
+          this.reWriteName = 'pkuSelect'
+        }
+        if (this.opt) {
+          this.$refs.edit.show = false
+          this.$refs.host.value = this.opt.quesText.split('____________')[0]
+        } else {
+          this.$nextTick(() => {
+            this.$refs.host.reset()
+          })
+        }
+        this.question = ''
+        this.questionID = 0
+        this.$emit('groupChange', val)
+      }
+    },
+    onQuestionEventHandler (val) {
+      if (val) {
+        this.question = val
+        this.questionID++
+        // this.$refs.host.value = '访员是否提问了 ' + this.$refs.host.value + ' 一题相关内容？'
+        console.log(3434, this.$refs.host.value)
+      }
+    },
     onSubmitEventHandler () {
     //   let content = this.title.filter(item => item.questionId === this.select)
       let value = []
@@ -170,14 +306,16 @@ export default {
         }
         ctype.push(item.checktype)
       })
+      console.log(this.inputTitle)
       this.$emit('callback', {
         'QuesOptionValues': sns.toString(),
         'QuesOptionTexts': value.toString(),
         'optionWithoutInput': ctype.toString(),
         // 'questionID': this.select,
-        'questionContent': this.inputTitle,
+        'questionContent': this.$refs.host.value + ' 一题，' + this.inputTitle,
         'questionSn': this.inputSn,
         'QuesType': '0001'
+        //temp1.$children[3].$data.value =2
       })
     }
   }
