@@ -107,6 +107,7 @@ export default {
       group: '',
       question: '',
       inputSn: '',
+      cid: '',
       tmpSelected: ''
     }
   },
@@ -115,7 +116,8 @@ export default {
       console.log('opt', this.opt, val)
       if (this.opt) {
         let tmp = val.filter(item => item.questionId === this.opt.relatedQuesGroupID)
-        this.question = this.opt.quesId
+        // this.question = this.opt.quesId
+        this.question = this.opt.quesText.split('____________')[1]
         this.$refs.input.value = this.opt.quesSn
         this.$emit('groupChange', this.opt.relatedQuesGroupID)
         this.$refs.host.value = this.opt.quesText.split('____________')[0]
@@ -130,6 +132,8 @@ export default {
         this.$refs.input.value = this.opt.quesSn
         this.$emit('groupChange', this.opt.relatedQuesGroupID)
         this.$refs.host.value = this.opt.quesText.split('____________')[0]
+        this.cid = this.opt.quesText.split('____________')[1].split('[')[0]
+        console.log(this.cid)
         this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
       }
     }
@@ -216,6 +220,7 @@ export default {
       }
     },
     onSubmitEventHandler () {
+      console.log('a.vue ', this.question)
       let content = this.questions.filter(item => item.questionId === this.question)
       this.$emit('callback', {
         'type': this.opt ? 'put' : 'post',
@@ -224,6 +229,7 @@ export default {
         'questionID': this.question,
         'questionContent': this.$refs.host.value,
         'questionSn': this.inputSn,
+        'cid': this.cid,
         'QuesType': '3000'
       })
     }

@@ -143,8 +143,13 @@ export default {
     }
   },
   mounted () {
-    console.log("debug select", this)
     if (this.fill && this.res) {
+      console.log('debug select', this.$children, this.res)
+      this.$children.forEach((item, index) => {
+        if (index !== 0) {
+          item.value = this.res.quesOptions[index-1]
+        }
+      })
       this.res.quesOptions.forEach((item, index) => {
         if (item !== null) {
           this.$children[0].$data.value = index
@@ -154,7 +159,6 @@ export default {
       this.$refs.t1.$children[0].$data.value = this.opt.quesText
       this.$refs.t2.$children[0].$data.value = this.opt.quesSn
       this.selects = []
-      console.log(this, 2)
       this.opt.quesOptions.forEach((item, id) => {
         this.selects.push({
           sn: item,

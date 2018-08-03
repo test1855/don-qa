@@ -232,25 +232,31 @@ export default {
             if (val.quesType === '0001') {
               let num = this.$refs.res[count].$children[0].$data.value
               val.a = [val.optionOrders[num]]
-              val.b = [val.quesOptions[num]]
+              console.log('0001!!!!', num, val.optionOrders, val.a)
+              if (val.quesOptionsWithInput[num] === true) {
+                val.b = [this.$refs.res[count].$children[num+1].value]
+                console.log(val.b)
+              } else {
+                val.b = [val.quesOptions[num]]
+              }
               delete val.optionOrders
               val.optionOrders = val.a.concat()
               delete val.quesOptions
               val.quesOptions = val.b.concat()
               delete val.a
               delete val.b
-              let inputtext = []
-              val.quesOptionsWithInput.forEach((v, id) => {
-                if (v === true) {
-                  val.optionOrders.forEach((x) => {
-                    let numx = Number(x)
-                    inputtext.push(this.$refs.res[count].$children[numx+1].value)
-                  })
-                } else {
-                  inputtext.push(false)
-                }
-              })
-              val.optionsInput = inputtext
+              // let inputtext = []
+              // val.quesOptionsWithInput.forEach((v, id) => {
+              //   if (v === true) {
+              //     val.optionOrders.forEach((x) => {
+              //       let numx = Number(x)
+              //       inputtext.push(this.$refs.res[count].$children[numx+1].value)
+              //     })
+              //   } else {
+              //     inputtext.push(false)
+              //   }
+              // })
+              // val.optionsInput = inputtext
               console.log(val.quesType, val, val.quesOptions)
               res.push(val)
             } else if (val.quesType === '0100') {
