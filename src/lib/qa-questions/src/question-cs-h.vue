@@ -107,6 +107,7 @@ export default {
       question: '',
       inputSn: '',
       cid: '',
+      rid: '',
       tmpSelected: ''
     }
   },
@@ -133,6 +134,8 @@ export default {
         this.$emit('groupChange', this.opt.relatedQuesGroupID)
         this.$refs.host.value = this.opt.quesText.split('____________')[0]
         this.cid = this.opt.quesText.split('____________')[1].split('[')[0]
+        this.rid = this.opt.quesText.split('[')[1].split(']')[0]
+        console.log(this.rid)
         this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
       }
     }
@@ -236,6 +239,7 @@ export default {
         'questionContent': this.$refs.host.value,
         'questionSn': this.inputSn,
         'cid': this.cid,
+        'rid': this.rid,
         'QuesType': '3007'
       })
     }
