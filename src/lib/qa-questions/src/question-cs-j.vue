@@ -25,6 +25,12 @@
         exportKey="questionId"
         @callback="onQuestionEventHandler"></pku-select>
     </don-qa-question-wrap>
+    <don-qa-question-wrap label="核查员注意">
+      <pku-input
+        class="wrap-input"
+        ref="attention"
+        @change="onAttentionEventHandler"></pku-input>
+    </don-qa-question-wrap>
     <don-qa-question-wrap>
       <pku-radio
         importKey="name"
@@ -94,7 +100,8 @@ export default {
       select: undefined,
       inputOptions: this.options,
       QuesOptionValues: [],
-      QuesOptionTexts: []
+      QuesOptionTexts: [],
+      attention: ''
     }
   },
   mounted () {
@@ -109,6 +116,9 @@ export default {
   methods: {
     onInputEventHandler (val) {
       this.inputSn = val
+    },
+    onAttentionEventHandler  (val) {
+      this.attention = val
     },
     onGroupEventHandler (val) {
       if (val) {
@@ -150,7 +160,8 @@ export default {
         'questionID': this.question, 
         'questionContent': content[0].quesText + ' 这一题，受访者给出的答案是什么？', 
         'questionSn': this.inputSn, 
-        'QuesType': '3009'
+        'QuesType': '3009',
+        'attention': this.attention
       })
     }
   }

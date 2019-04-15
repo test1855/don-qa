@@ -158,9 +158,9 @@ export default {
     splitTitle (item) {
       let title = item.quesText
       if (item.quesType === '3008') {
-        return title.split('____________')[0] + '<strong><span style=\"background-color: rgb(255, 255, 0);\">【调查问卷答案】' + item.quesAnswer + '</span></strong>'
+        return title.split('____________')[0] + '<strong><span style=\"background-color: rgb(255, 255, 0);\">【调查问卷答案】' + item.quesAnswer + '</span></strong>' + '<br><strong><span style=\"background-color: blue;\">【核查员注意】' + item.attention + '</span></strong>'
       }
-      return title.split('____________')[0]
+      return title.split('____________')[0] + '<br><strong><span style=\"background-color: blue;\">【核查员注意】' + item.attention + '</span></strong>'
     },
     onPrevEventHandler () {
       this.$emit('prev')

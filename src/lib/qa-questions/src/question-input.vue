@@ -26,6 +26,12 @@
             @callback="onPropertyEventHandler">
           </pku-select>
         </don-qa-question-wrap>
+        <don-qa-question-wrap label="核查员注意">
+          <pku-input
+            class="wrap-input"
+            ref="attention"
+            @change="onAttentionEventHandler"></pku-input>
+        </don-qa-question-wrap>
         <don-qa-question-wrap v-if="!fill">
           <pku-button
             value="保存"
@@ -112,7 +118,8 @@ export default {
       inputMin: '',
       inputMax: '',
       message: '',
-      type: this.opt.quesType || '0100'
+      type: this.opt.quesType || '0100',
+      attention: ''
     }
   },
   mounted () {
@@ -137,6 +144,9 @@ export default {
       this.inputSn = val
       console.log('Sn', this.inputSn, (!this.inputSn || !this.inputTitle))
     },
+    onAttentionEventHandler  (val) {
+      this.attention = val
+    },
     onTitleEventHandler (val) {
       this.inputTitle = val
       console.log('Title', this.inputTitle, (!this.inputSn || !this.inputTitle))
@@ -156,7 +166,8 @@ export default {
         'questionSn': this.inputSn,
         'QuesType': this.type,
         'minCharacter': Number(this.inputMin),
-        'maxCharacter': Number(this.inputMax)
+        'maxCharacter': Number(this.inputMax),
+        'attention': this.attention
       })
     }
   }

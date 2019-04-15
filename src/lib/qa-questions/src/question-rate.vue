@@ -36,6 +36,12 @@
             :voidStart="Number(inputVoidNum)"
           ></pku-rate>
         </don-qa-question-wrap>
+        <don-qa-question-wrap label="核查员注意">
+          <pku-input
+            class="wrap-input"
+            ref="attention"
+            @change="onAttentionEventHandler"></pku-input>
+        </don-qa-question-wrap>
         <don-qa-question-wrap>
           <pku-button
             value="保存"
@@ -107,7 +113,8 @@ export default {
       inputTitle: undefined,
       inputMax: this.max,
       inputVoidNum: this.voidNum,
-      inputType: '0600'
+      inputType: '0600',
+      attention: ''
     }
   },
   mounted () {
@@ -125,6 +132,9 @@ export default {
   methods: {
     onSnEventHandler (val) {
       this.inputSn = val
+    },
+    onAttentionEventHandler  (val) {
+      this.attention = val
     },
     onTitleEventHandler (val) {
       this.inputTitle = val
@@ -148,7 +158,8 @@ export default {
         'valueCount': this.inputMax,
         'recomStartNum': this.inputVoidNum,
         'questionSn': this.inputSn,
-        'QuesType': this.inputType
+        'QuesType': this.inputType,
+        'attention': this.attention
       })
     }
   }

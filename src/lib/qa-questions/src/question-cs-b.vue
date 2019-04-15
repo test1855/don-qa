@@ -31,6 +31,12 @@
       </component>
       <pku-edit v-if="opt || (reWrite && this.question )" :showFunc="showFunc" :cancelFunc="cancelFunc" :submitFunc="submitFunc" ref="edit"></pku-edit>
     </don-qa-question-wrap>
+    <don-qa-question-wrap label="核查员注意">
+      <pku-input
+        class="wrap-input"
+        ref="attention"
+        @change="onAttentionEventHandler"></pku-input>
+    </don-qa-question-wrap>
     <don-qa-question-wrap>
       <pku-radio
         importKey="name"
@@ -109,7 +115,8 @@ export default {
       inputSn: '',
       cid: '',
       rid: '',
-      tmpSelected: ''
+      tmpSelected: '',
+      attention:''
     }
   },
   watch: {
@@ -203,6 +210,9 @@ export default {
     onInputEventHandler (val) {
       this.inputSn = val
     },
+    onAttentionEventHandler  (val) {
+      this.attention = val
+    },
     onGroupEventHandler (val) {
       if (val) {
         this.group = val
@@ -241,7 +251,8 @@ export default {
         'questionSn': this.inputSn,
         'cid': this.cid,
         'rid': this.rid,
-        'QuesType': '3001'
+        'QuesType': '3001',
+        'attention': this.attention
       })
     }
   }

@@ -62,6 +62,12 @@
               @callback="onSelectEventHandler($event, id, 'checktype')"></pku-switch>
           </don-qa-question-wrap>
         </transition-group>
+        <don-qa-question-wrap label="核查员注意">
+          <pku-input
+            class="wrap-input"
+            ref="attention"
+            @change="onAttentionEventHandler"></pku-input>
+        </don-qa-question-wrap>
         <don-qa-question-wrap>
           <pku-button
             class="btn-primary"
@@ -139,7 +145,8 @@ export default {
       inputTitle: undefined,
       selecttype: [],
       reWriteName: 'pkuSelect',
-      tmpSelected: ''
+      tmpSelected: '',
+      attention: ''
     }
   },
   mounted () {
@@ -218,6 +225,9 @@ export default {
     },
     onSnEventHandler (val) {
       this.inputSn = val
+    },
+    onAttentionEventHandler  (val) {
+      this.attention = val
     },
     onTitleEventHandler (val) {
       this.inputTitle = val
@@ -318,7 +328,8 @@ export default {
         // 'questionID': this.select,
         'questionContent': this.$refs.host.value + ' 一题，' + this.inputTitle,
         'questionSn': this.inputSn,
-        'QuesType': '0001'
+        'QuesType': '0001',
+        'attention': this.attention
         //temp1.$children[3].$data.value =2
       })
     }

@@ -78,6 +78,7 @@ export default {
           res[item.$el.dataset.key] = item.value
         } else {
           if (!item.value) {
+            console.log(333, item)
             idx++
           }
           res[item.$el.dataset.key] = item.value
