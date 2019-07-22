@@ -86,7 +86,7 @@
         exportKey="value"
         :disabled="false"
         :message="options"></pku-radio>
-    <div class="don-qa-question-select" v-for="option in options">
+    <div class="don-qa-question-select" v-for="option in options" :key="option.value">
       <pku-input class="wrap-input" :disabled="!option.quesOptionsWithInput"></pku-input>
     </div>
   </div>
@@ -151,7 +151,6 @@ export default {
   },
   mounted () {
     if (this.fill && this.res) {
-      console.log('debug select', this.$children, this.res)
       this.$children.forEach((item, index) => {
         if (index !== 0) {
           item.value = this.res.quesOptions[index-1]
@@ -303,7 +302,7 @@ export default {
         this.question = val
         this.questionID++
         // this.$refs.host.value = '访员是否提问了 ' + this.$refs.host.value + ' 一题相关内容？'
-        console.log(3434, this.$refs.host.value)
+        // console.log(3434, this.$refs.host.value)
       }
     },
     onSubmitEventHandler () {
@@ -312,7 +311,7 @@ export default {
       let sns = []
       let ctype = []
       this.selects.forEach(item => {
-        console.log(item)
+        // console.log(item)
         value.push(item.val)
         sns.push(item.sn)
         if (item.checktype === '') {
@@ -320,7 +319,7 @@ export default {
         }
         ctype.push(item.checktype)
       })
-      console.log(this.inputTitle)
+      // console.log(this.inputTitle)
       this.$emit('callback', {
         'QuesOptionValues': sns.toString(),
         'QuesOptionTexts': value.toString(),

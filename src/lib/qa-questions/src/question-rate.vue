@@ -132,12 +132,14 @@ export default {
   methods: {
     onSnEventHandler (val) {
       this.inputSn = val
+      console.log('Sn', this.inputSn, (!this.inputSn || !this.inputTitle || this.inputMax === '' || this.inputVoid === ''))
     },
     onAttentionEventHandler  (val) {
       this.attention = val
     },
     onTitleEventHandler (val) {
       this.inputTitle = val
+      console.log('Title', this.inputTitle, (!this.inputSn || !this.inputTitle || this.inputMax === '' || this.inputVoid === ''))
     },
     onMaxEventHandler (val) {
       this.inputMax = val

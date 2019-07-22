@@ -27,8 +27,8 @@
           <component v-else-if="item.quesType === '3007'" v-bind:is='"donQuestionCsH"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '3008'" v-bind:is='"donQuestionCsI"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '3009'" v-bind:is='"donQuestionCsJ"' :options="eachOption(item)" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
-          <component v-else-if="item.quesType === '0100'" importType="0100" v-bind:is='"donQuestionInput"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
-          <component v-else-if="item.quesType === '0102'" importType="0102" v-bind:is='"donQuestionInput"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
+          <component v-else-if="item.quesType === '0100'" importType="0100" v-bind:is='"donQuestionInput"' :disflag="item.quesText.indexOf('显示出') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
+          <component v-else-if="item.quesType === '0102'" importType="0102" v-bind:is='"donQuestionInput"' :disflag="item.quesText.indexOf('显示出') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '0600' || item.quesType ==='0601'" v-bind:is='"donQuestionRate"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '0001'" v-bind:is='"donQuestionSelect"' :options="eachOption(item)" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component>
           <component v-else></component>
@@ -121,16 +121,11 @@ export default {
       })
       let tmp = JSON.parse(this.content)
       let arr = tmp.filter(item => Number(item.indexForAns) === len)
-      console.log('arr ', arr, arr.length)
       if (arr) {
         if (this.options[index1][index2].quesType === '0600') {
-          // console.log('eachRes0600 ', index1, index2)
-          // console.log('eachRes0600111 ', len, arr, this.options[0][len])
           if(arr[0]) {
-            console.log('arr[0] ', arr[0])
             arr[0].recomStartNum = this.options[0][len].recomStartNum
             arr[0].valueCount = this.options[0][len].valueCount
-            console.log('arr[0]111 ', arr[0])
           }
         }
         return arr[0]
@@ -139,7 +134,6 @@ export default {
       }
     },
     eachFile (item) {
-      console.log('audio', this.audio)
       // return this.audio + '_4101021101_1532335946162(0).mp3'
       let tmp = item.quesText.split('____________')
       if (tmp.length > 1) {
@@ -184,7 +178,8 @@ export default {
       this.$refs.res.forEach(singleQuestion => {
         let name = singleQuestion.$options.name
         if (name === 'donQuestionInput') {
-          if (singleQuestion.$children[0]) {
+          console.log('donQuestionInput:disflag ', singleQuestion.disflag)
+          if (!singleQuestion.disflag && singleQuestion.$children[0]) {
             if (singleQuestion.$children[0].$data.value.length === 0) {
               tmpCount++
             }
@@ -232,10 +227,8 @@ export default {
             if (val.quesType === '0001') {
               let num = this.$refs.res[count].$children[0].$data.value
               val.a = [val.optionOrders[num]]
-              console.log('0001!!!!', num, val.optionOrders, val.a)
               if (val.quesOptionsWithInput[num] === true) {
                 val.b = [this.$refs.res[count].$children[num+1].value]
-                console.log(val.b)
               } else {
                 val.b = [val.quesOptions[num]]
               }
@@ -257,19 +250,19 @@ export default {
               //   }
               // })
               // val.optionsInput = inputtext
-              console.log(val.quesType, val, val.quesOptions)
               res.push(val)
             } else if (val.quesType === '0100') {
-              let num = this.$refs.res[count].$children[0].$data.value
+              let num = '显示'
+              if (!this.$refs.res[count].disflag) {
+                num = this.$refs.res[count].$children[0].$data.value
+              }
               // delete val.optionOrders
               val.optionOrders = ['0']
               // delete val.quesOptions
               val.quesOptions = [num]
               res.push(val)
-              console.log(val.quesType, val, val.quesOptions)
             } else if (val.quesType === '0102') {
             } else if (val.quesType === '0600' || val.quesType === '0601') {
-              console.log('0600||0601', this, this.$refs.res[count], this.$refs.res[count].$children[0])
               let num = this.$refs.res[count].$children[0].voidStart + this.$refs.res[count].$children[0].nowValue
               delete val.optionOrders
               val.optionOrders = ['0']
@@ -286,13 +279,12 @@ export default {
               val.quesOptions = val.b.concat()
               delete val.a
               delete val.b
-              console.log(val.quesType, val, val.quesOptions)
               res.push(val)
             }
             count++
           })
         })
-        console.log('answerStr ', res)
+        console.log('answersStr', res)
         this.$emit("callback", {
           answersStr: res
         })

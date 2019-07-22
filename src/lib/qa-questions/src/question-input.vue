@@ -35,8 +35,7 @@
         <don-qa-question-wrap v-if="!fill">
           <pku-button
             value="保存"
-            :class="{'btn-primary': true, 'btn-disabled': (!inputSn || !inputTitle)}"
-            :disabled="(!inputSn || !inputTitle)"
+            class="btn-primary"
             @callback="onSubmitEventHandler"></pku-button>
         </don-qa-question-wrap>
       </div>
@@ -73,7 +72,7 @@
     </pku-tab>
   </div>
   <div class="don-qa-question-input" v-else>
-    <pku-input class="wrap-input" v-if="importType === '0100' || importType === '0102'"></pku-input>
+    <pku-input class="wrap-input" v-if="importType === '0100' || importType === '0102'" :disabled="disflag"></pku-input>
   </div>
 </template>
 
@@ -98,6 +97,10 @@ export default {
         return null
       }
     },
+    disflag: {
+      type: Boolean,
+      default: false
+    },
     propertyInfo: {
       type: Array,
       default () {
@@ -113,17 +116,17 @@ export default {
         // { name: '密码', key: '0101' },
         { name: '纯文字', key: '0102' }
       ],
-      inputSn: '',
-      inputTitle: '',
+      inputSn: undefined,
+      inputTitle: undefined,
       inputMin: '',
       inputMax: '',
       message: '',
-      type: this.opt.quesType || '0100',
+      // type: this.opt.quesType || '0100',
+      type: '0100',
       attention: ''
     }
   },
   mounted () {
-    console.log("debug ", this)
     if (this.fill && this.res) {
       // console.log(this)
       this.$children[0].$data.value = this.res.quesOptions[0]
@@ -142,14 +145,14 @@ export default {
     // 你截图部分的是文本化的显示。原系统是用onclick事件做的。
     onSnEventHandler (val) {
       this.inputSn = val
-      console.log('Sn', this.inputSn, (!this.inputSn || !this.inputTitle))
+      console.log('Sn', this.inputSn, (!this.inputSn || !this.inputTitle || this.inputSn === '' || this.inputTitle === ''))
     },
     onAttentionEventHandler  (val) {
       this.attention = val
     },
     onTitleEventHandler (val) {
       this.inputTitle = val
-      console.log('Title', this.inputTitle, (!this.inputSn || !this.inputTitle))
+      console.log('Title', this.inputTitle, (!this.inputSn || !this.inputTitle || this.inputSn === '' || this.inputTitle === ''))
     },
     onMaxEventHandler (val) {
       this.inputMax = val
@@ -161,14 +164,23 @@ export default {
       this.message = this.inputTitle + '${Sample_' + val +'}'
     },
     onSubmitEventHandler () {
-      this.$emit('callback', {
-        'questionContent': this.inputTitle,
-        'questionSn': this.inputSn,
-        'QuesType': this.type,
-        'minCharacter': Number(this.inputMin),
-        'maxCharacter': Number(this.inputMax),
-        'attention': this.attention
-      })
+      if (!this.inputTitle || !this.inputSn) {
+        this.$notice({
+          title: '保存失败！',
+          message: '题目序号或标题未填写',
+          type: 'error',
+          time: 3000
+        })
+      } else {
+        this.$emit('callback', {
+          'questionContent': this.inputTitle,
+          'questionSn': this.inputSn,
+          'QuesType': this.type,
+          'minCharacter': Number(this.inputMin),
+          'maxCharacter': Number(this.inputMax),
+          'attention': this.attention
+        })
+      }
     }
   }
 }
