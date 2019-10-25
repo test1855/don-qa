@@ -6,8 +6,8 @@
         value="获取录音时间"
         @callback="onPlayEventHandler"></pku-button>
     </don-qa-question-wrap>
-    <div v-for="(group, index1) in options">
-      <div class="qa-answer-wrapper" v-for="(item, index2) in group">
+    <div v-for="(group, index1) in options" :key="index1">
+      <div class="qa-answer-wrapper" v-for="(item, index2) in group" :key="index2">
         <div class="qa-answer-title">
           {{item.quesSn}}: <span v-html="splitTitle(item)"></span>
           <audio  class="audio"
@@ -27,11 +27,11 @@
           <component v-else-if="item.quesType === '3007'" v-bind:is='"donQuestionCsH"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '3008'" v-bind:is='"donQuestionCsI"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '3009'" v-bind:is='"donQuestionCsJ"' :options="eachOption(item)" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
-          <component v-else-if="item.quesType === '0100'" importType="0100" v-bind:is='"donQuestionInput"' :disflag="item.quesText.indexOf('显示出') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
-          <component v-else-if="item.quesType === '0102'" importType="0102" v-bind:is='"donQuestionInput"' :disflag="item.quesText.indexOf('显示出') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
+          <component v-else-if="item.quesType === '0100'" importType="0100" v-bind:is='"donQuestionInput"' :disflag="item.quesText.indexOf('显示') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
+          <component v-else-if="item.quesType === '0102'" importType="0102" v-bind:is='"donQuestionInput"' :disflag="item.quesText.indexOf('显示') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '0600' || item.quesType ==='0601'" v-bind:is='"donQuestionRate"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '0001'" v-bind:is='"donQuestionSelect"' :options="eachOption(item)" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component>
-          <component v-else></component>
+          <!-- <component v-else></component> -->
         </div>
       </div>
     </div>
@@ -94,10 +94,15 @@ export default {
       let arr = []
       if (val.quesType === '0001') {
         val.quesOptionTexts.forEach((item, index) => {
+          let display = 'display:block'
+          if (!val.quesOptionsWithInput[index]) {
+            display = 'display:none'
+          }
           arr.push({
             name: item,
             value: val.quesOptions[index],
-            quesOptionsWithInput: val.quesOptionsWithInput[index]
+            quesOptionsWithInput: val.quesOptionsWithInput[index],
+            display: display
           })
         })
       } else {
@@ -152,7 +157,7 @@ export default {
     splitTitle (item) {
       let title = item.quesText
       if (item.quesType === '3008') {
-        return title.split('____________')[0] + '<strong><span style=\"background-color: rgb(255, 255, 0);\">【调查问卷答案】' + item.quesAnswer + '</span></strong>' + '<br><strong><span style=\"background-color: blue;\">【核查员注意】' + item.attention + '</span></strong>'
+        return title.split('____________')[0] + '<strong><span style=\"background-color: rgb(255, 255, 0);\">【调查问卷答案】' + item.quesAnswer + '</span></strong>' + '<br><strong><span style=\"background-color: LightSkyBlue;\">【核查员注意】' + item.attention + '</span></strong>'
       }
       return title.split('____________')[0] + '<br><strong><span style=\"background-color: blue;\">【核查员注意】' + item.attention + '</span></strong>'
     },
@@ -178,7 +183,6 @@ export default {
       this.$refs.res.forEach(singleQuestion => {
         let name = singleQuestion.$options.name
         if (name === 'donQuestionInput') {
-          console.log('donQuestionInput:disflag ', singleQuestion.disflag)
           if (!singleQuestion.disflag && singleQuestion.$children[0]) {
             if (singleQuestion.$children[0].$data.value.length === 0) {
               tmpCount++
@@ -189,7 +193,10 @@ export default {
             tmpCount++
           }
         } else if (name === 'donQuestionSelect') {
-          if (singleQuestion.$children[0].$data.value === false) {
+          let idx = singleQuestion.$children[0].$data.value   // 选项序号
+          if (idx === false) {
+            tmpCount++
+          } else if (singleQuestion.options[idx].quesOptionsWithInput && singleQuestion.$children[idx+1].value === '') {  // 若该序号对应选项有请说明，且说明为空
             tmpCount++
           }
         } else {
@@ -228,7 +235,7 @@ export default {
               let num = this.$refs.res[count].$children[0].$data.value
               val.a = [val.optionOrders[num]]
               if (val.quesOptionsWithInput[num] === true) {
-                val.b = [this.$refs.res[count].$children[num+1].value]
+                val.b = [val.quesOptions[num] + '-' + this.$refs.res[count].$children[num+1].value]
               } else {
                 val.b = [val.quesOptions[num]]
               }

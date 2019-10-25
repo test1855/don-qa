@@ -81,13 +81,14 @@
     <!-- </pku-tab> -->
   </div>
   <div class="don-qa-question-select" v-else>
-     <pku-radio
-        importKey="name"
-        exportKey="value"
-        :disabled="false"
-        :message="options"></pku-radio>
+    <pku-radio
+      importKey="name"
+      exportKey="value"
+      :disabled="false"
+      :message="options"
+      @callback="onRadioEventHandler"></pku-radio>
     <div class="don-qa-question-select" v-for="option in options" :key="option.value">
-      <pku-input class="wrap-input" :disabled="!option.quesOptionsWithInput"></pku-input>
+      <pku-input class="wrap-input" :style="option.display" :disabled="true"></pku-input>
     </div>
   </div>
 </template>
@@ -113,8 +114,8 @@ export default {
       type: Array,
       default () {
         return [
-          { name: '是', value: 1, quesOptionsWithInput: false },
-          { name: '无法判断', value: 9, quesOptionsWithInput: false }
+          { name: '是', value: 1, quesOptionsWithInput: false, display: 'display:none' },
+          { name: '无法判断', value: 9, quesOptionsWithInput: false, display: 'display:none' }
         ]
       }
     },
@@ -151,11 +152,20 @@ export default {
   },
   mounted () {
     if (this.fill && this.res) {
+      // 填输入框
       this.$children.forEach((item, index) => {
-        if (index !== 0) {
-          item.value = this.res.quesOptions[index-1]
+        if (index !== 0 && this.res.quesOptions[index-1]) {
+          let idx = this.res.quesOptions[index-1].search('-')
+          if (idx === -1) {
+            item.value = this.res.quesOptions[index-1]
+            item.disabled = false
+          } else {
+            item.value = this.res.quesOptions[index-1].substr(idx+1)
+            item.disabled = false
+          }
         }
       })
+      // 填选项 this.$children[0].$data.value = 序号
       this.res.quesOptions.forEach((item, index) => {
         if (item !== null) {
           this.$children[0].$data.value = index
@@ -230,6 +240,25 @@ export default {
     },
     onTitleEventHandler (val) {
       this.inputTitle = val
+    },
+    onRadioEventHandler (val) {
+      let idx = this.$children[0].value
+      if (!this.options[idx].quesOptionsWithInput) {
+        this.$children.forEach((item, index) => {
+          if (index !== 0) {
+            item.disabled = true
+            item.value = ''
+          }
+        })
+      } else {
+        this.$children.forEach((item, index) => {
+          if (index !== 0) {
+            item.disabled = true
+            item.value = ''
+          }
+        })
+        this.$children[idx+1].disabled = false
+      }
     },
     onSelectEventHandler (val, index, type) {
       if (type === 'checktype') {
@@ -345,4 +374,7 @@ div.don-qa-question-select >>> .don-qa-question-wrap label {
 .question-input {
   width: 48%;
 }
+/* .select-input {
+  display: none;
+} */
 </style>
