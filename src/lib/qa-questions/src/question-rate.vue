@@ -3,13 +3,13 @@
     <pku-tab
       :list="list">
       <div slot="slot_0">
-        <don-qa-question-wrap label="题目序号">
+        <don-qa-question-wrap label="题目序号" ref="t1">
           <pku-input
             class="wrap-input"
             ref="input"
             @change="onSnEventHandler"></pku-input>
         </don-qa-question-wrap>
-        <don-qa-question-wrap label="题目标题">
+        <don-qa-question-wrap label="题目标题" ref="t2">
           <pku-input
             class="wrap-input"
             ref="input"
@@ -18,14 +18,14 @@
         <don-qa-question-wrap label="净值个数">
           <pku-input
             class="wrap-input"
-            ref="input"
+            ref="input1"
             :message="inputMax"
             @change="onMaxEventHandler"></pku-input>
         </don-qa-question-wrap>
         <don-qa-question-wrap label="净值初始值">
           <pku-input
             class="wrap-input"
-            ref="input"
+            ref="input2"
             :message="inputVoidNum"
             @change="onNumEventHandler"></pku-input>
         </don-qa-question-wrap>
@@ -97,6 +97,12 @@ export default {
         return null
       }
     },
+    opt: {
+      type: Object,
+      default () {
+        return null
+      }
+    },
     fill: {
       type: Boolean,
       default: false
@@ -113,7 +119,7 @@ export default {
       inputTitle: undefined,
       inputMax: this.max,
       inputVoidNum: this.voidNum,
-      inputType: '0600',
+      type: '0600',
       attention: ''
     }
   },
@@ -125,8 +131,15 @@ export default {
         this.$children[0].$data.clickID = this.res.quesOptions[0] - this.res.recomStartNum
         this.$children[0].$data.nowValue = this.res.quesOptions[0] - this.res.recomStartNum
       }
+    } else if (!this.fill && this.opt) {
+      this.$refs.t1.$children[0].$data.value = this.opt.quesSn
+      this.$refs.t2.$children[0].$data.value = this.opt.quesText.split('____________')[0]
+      this.$refs.input1.value = this.opt.valueCount
+      this.$refs.input2.value = this.opt.recomStartNum
+      this.$refs.type.$data.value = this.opt.quesType
+      this.$refs.attention.value = this.opt.attention
     } else {
-      this.$refs.type.$data.value = 0
+      this.$refs.type.$data.value = '0600'
     }
   },
   methods: {
@@ -145,22 +158,20 @@ export default {
       this.inputMax = val
     },
     onTypeEventHandler (val) {
-      if (val === 0) {
-        this.inputType = '0600'
-      } else {
-        this.inputType = '0601'
-      }
+      console.log('rate-typehandler', val)
+      this.type = val
     },
     onNumEventHandler (val) {
       this.inputVoidNum = Number(val)
     },
     onSubmitEventHandler () {
       this.$emit('callback', {
+        'type': this.opt ? 'put' : 'post',
         'questionContent': this.inputTitle,
         'valueCount': this.inputMax,
         'recomStartNum': this.inputVoidNum,
         'questionSn': this.inputSn,
-        'QuesType': this.inputType,
+        'QuesType': this.type,
         'attention': this.attention
       })
     }

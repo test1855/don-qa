@@ -49,16 +49,18 @@
             ref="type"
             @callback="onRadioEventHandler"></pku-radio>
         </don-qa-question-wrap>
-        <don-qa-question-wrap label="最小长度" v-if="!fill">
+        <don-qa-question-wrap label="最小长度(值)" v-if="!fill">
           <pku-input
+            type="number"
             class="wrap-input"
-            ref="input"
+            ref="input1"
             @change="onMinEventHandler"></pku-input>
         </don-qa-question-wrap>
-        <don-qa-question-wrap label="最大长度" v-if="!fill">
+        <don-qa-question-wrap label="最大长度(值)" v-if="!fill">
           <pku-input
+            type="number"
             class="wrap-input"
-            ref="input"
+            ref="input2"
             @change="onMaxEventHandler"></pku-input>
         </don-qa-question-wrap>
         <don-qa-question-wrap v-if="!fill">
@@ -72,7 +74,8 @@
     </pku-tab>
   </div>
   <div class="don-qa-question-input" v-else>
-    <pku-input class="wrap-input" v-if="importType === '0100' || importType === '0102'" :disabled="disflag"></pku-input>
+    <pku-input class="wrap-input" v-if="importType === '0100' || importType === '0102'" @change="onCheckMinMaxHandler" ref="inputstr" :disabled="disflag"></pku-input>
+    <pku-input class="wrap-number-input" v-else type="number" min="minval" max="maxval" @change="onCheckMinMaxHandler"  ref="inputnum" :disabled="disflag"></pku-input>
   </div>
 </template>
 
@@ -85,7 +88,10 @@ export default {
       default: false
     },
     opt: {
-      type: Object
+      type: Object,
+      default () {
+        return null
+      }
     },
     importType: {
       type: String,
@@ -101,6 +107,14 @@ export default {
       type: Boolean,
       default: false
     },
+    minval: {
+      type: Number,
+      default: 0
+    },
+    maxval: {
+      type: Number,
+      default: 9999
+    },
     propertyInfo: {
       type: Array,
       default () {
@@ -114,12 +128,13 @@ export default {
       options: [
         { name: '文本', key: '0100' },
         // { name: '密码', key: '0101' },
-        { name: '纯文字', key: '0102' }
+        { name: '纯文字', key: '0102' },
+        { name: '数值', key: '0103' },
       ],
       inputSn: undefined,
       inputTitle: undefined,
-      inputMin: '',
-      inputMax: '',
+      inputMin: '0',
+      inputMax: '9999',
       message: '',
       // type: this.opt.quesType || '0100',
       type: '0100',
@@ -128,17 +143,32 @@ export default {
   },
   mounted () {
     if (this.fill && this.res) {
-      // console.log(this)
       this.$children[0].$data.value = this.res.quesOptions[0]
     } else if (!this.fill) {
-      // this.$refs.input[0].value
-      // console.log(0, this)
-      this.$refs.t1.$children[0].$data.value = this.opt.quesText
-      this.$refs.t2.$children[0].$data.value = this.opt.quesSn
+      if (this.opt === null || this.opt === undefined) {
+        this.$refs.input1.value = '0'
+        this.$refs.input2.value = '9999'
+      } else {
+        this.$refs.type.$data.value = this.opt.quesType
+        this.$refs.t1.$children[0].$data.value = this.opt.quesSn
+        this.$refs.t2.$children[0].$data.value = this.opt.quesText.split('____________')[0]
+        this.$refs.attention.value = this.opt.attention
+        if (this.opt.minCharacter === '' || this.opt.minCharacter === undefined) {
+          this.$refs.input1.value = '0'
+        } else {
+          this.$refs.input1.value = this.opt.minCharacter
+        }
+        if (this.opt.maxCharacter === '' || this.opt.maxCharacter === undefined) {
+          this.$refs.input2.value = '9999'
+        } else {
+          this.$refs.input2.value = this.opt.maxCharacter
+        }
+      }
     }
   },
   methods: {
     onRadioEventHandler (val) {
+      console.log('input-typehandler', val)
       this.type = val
     },
     // 这个题目类型是用questType来区别的。文本题：0100、密码题：0101、纯文字：0102。
@@ -161,6 +191,19 @@ export default {
     onPropertyEventHandler (val) {
       this.message = this.inputTitle + '${Sample_' + val +'}'
     },
+    onCheckMinMaxHandler (val) {
+      if((this.importType === '0100' || this.importType === '0102') && val !== undefined && val !== '') {
+        if (val.length > this.maxval || val.length < this.minval) {
+          this.$refs.inputstr.value = ''
+          alert('输入长度在 ' + this.minval + '~' + this.maxval + ' 之间')
+        }
+      } else if(this.importType === '0103' && val !== undefined && val !== '') {
+        if (val > this.maxval || val < this.minval) {
+          this.$refs.inputnum.value = ''
+          alert('输入范围在 ' + this.minval + '~' + this.maxval + ' 之间')
+        }
+      }
+    },
     onSubmitEventHandler () {
       if (!this.inputTitle || !this.inputSn) {
         this.$notice({
@@ -169,8 +212,23 @@ export default {
           type: 'error',
           time: 3000
         })
+      } else if (this.type !== '0103' && (Number(this.inputMin) >= Number(this.inputMax) || Number(this.inputMin) < 0 || Number(this.inputMax) < 0)) {
+        this.$notice({
+          title: '保存失败！',
+          message: '非数值题的最小长度应小于最大长度且长度不能为负数',
+          type: 'error',
+          time: 3000
+        })
+      } else if (Number(this.inputMin) >= Number(this.inputMax)) {
+        this.$notice({
+          title: '保存失败！',
+          message: '数值题的最小值应小于最大值',
+          type: 'error',
+          time: 3000
+        })
       } else {
         this.$emit('callback', {
+          'type': this.opt ? 'put' : 'post',
           'questionContent': this.inputTitle,
           'questionSn': this.inputSn,
           'QuesType': this.type,
@@ -186,6 +244,9 @@ export default {
 <style scoped>
 .wrap-input, .wrap-select {
   margin-bottom: 20px;
+}
+.wrap-number-input {
+  min-width: 100px;
 }
 div.don-qa-question-input >>> .don-qa-question-wrap label {
   font-size: 14px;

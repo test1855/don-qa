@@ -1,5 +1,5 @@
 <template>
-  <div class="don-qa-question-cs-j" v-if="!fill">
+  <div class="don-qa-question-cs-i" v-if="!fill">
     <don-qa-question-wrap label="题目序号">
       <pku-input
         class="wrap-input"
@@ -10,20 +10,26 @@
       <pku-select
         class="wrap-select"
         selected="选择问题组"
-        :list="array"
+        ref="group"
         importKey="quesText"
         exportKey="questionId"
+        :list="array"
         @callback="onGroupEventHandler"></pku-select>
     </don-qa-question-wrap>
     <don-qa-question-wrap label="题干">
-      <pku-select
+      <component
         class="wrap-select"
+        :is="reWriteName"
         selected="下面这一题，受访者给出的答案是什么？"
-        :list="questions"
-        :html="true"
         importKey="quesText"
         exportKey="questionId"
-        @callback="onQuestionEventHandler"></pku-select>
+        ref="host"
+        :style="{width: reWrite ? '80%' : 'unset'}"
+        :list="questions"
+        :html="true"
+        @callback="onQuestionEventHandler">
+      </component>
+      <pku-edit v-if="opt || (reWrite && this.question )" :showFunc="showFunc" :cancelFunc="cancelFunc" :submitFunc="submitFunc" ref="edit"></pku-edit>
     </don-qa-question-wrap>
     <don-qa-question-wrap label="核查员注意">
       <pku-input
@@ -36,30 +42,33 @@
         importKey="name"
         exportKey="id"
         :disabled="true"
-        :message="inputOptions"></pku-radio>
+        :message="options"></pku-radio>
     </don-qa-question-wrap>
     <don-qa-question-wrap>
       <pku-button
         value="保存"
-        :class="{'btn-primary': true, 'btn-disabled': questionID * groupID * inputSn.length === 0}"
-        :disabled="questionID * groupID * inputSn.length === 0"
+        :class="{'btn-primary': true, 'btn-disabled': (questionID * groupID * inputSn.length === 0) && question.length === 0}"
+        :disabled="(questionID * groupID * inputSn.length === 0) && question.length === 0"
         @callback="onSubmitEventHandler"></pku-button>
     </don-qa-question-wrap>
   </div>
-  <div class="don-qa-question-cs-j" v-else>
-    <pku-radio
-      importKey="name"
-      exportKey="id"
-      :disabled="false"
-      :message="options">
-    </pku-radio>
+  <div class="don-qa-question-cs-i" v-else>
+     <pku-radio
+        importKey="name"
+        exportKey="id"
+        :disabled="false"
+        :message="options"></pku-radio>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'donQuestionCsJ',
+  name: 'donQuestionCsI',
   props: {
+    reWrite: {
+      type: Boolean,
+      default: false
+    },
     fill: {
       type: Boolean,
       default: false
@@ -91,17 +100,53 @@ export default {
           { name: '无法判断', key: 9 }
         ]
       }
+    },
+    opt: {
+      type: Object,
+      default () {
+        return null
+      }
     }
   },
   data () {
     return {
-      selected: 0,
+      reWriteName: 'pkuSelect',
+      groupID: 0,
+      questionID: 0,
+      group: '',
+      question: '',
       inputSn: '',
-      select: undefined,
-      inputOptions: this.options,
-      QuesOptionValues: [],
-      QuesOptionTexts: [],
+      cid: '',
+      rid: '',
+      tmpSelected: '',
       attention: ''
+    }
+  },
+  watch: {
+    array (val) {
+      if (this.opt) {
+        let tmp = val.filter(item => item.questionId === this.opt.relatedQuesGroupID)
+        this.question = this.opt.quesId
+        this.$refs.input.value = this.opt.quesSn
+        this.$refs.attention.value = this.opt.attention
+        this.$emit('groupChange', this.opt.relatedQuesGroupID)
+        this.$refs.host.value = this.opt.quesText.split('____________')[0]
+        this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
+      }
+    },
+    opt (val) {
+      if (this.array) {
+        let tmp = this.array.filter(item => item.questionId === this.opt.relatedQuesGroupID)
+        this.question = this.opt.quesId
+        this.$refs.input.value = this.opt.quesSn
+        this.$refs.attention.value = this.opt.attention
+        this.$emit('groupChange', this.opt.relatedQuesGroupID)
+        this.$refs.host.value = this.opt.quesText.split('____________')[0]
+        this.cid = this.opt.quesText.split('____________')[1].split('[')[0]
+        this.rid = this.opt.quesText.split('[')[1].split(']')[0]
+        console.log(this.rid)
+        this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
+      }
     }
   },
   mounted () {
@@ -111,9 +156,57 @@ export default {
           this.$children[0].$data.value = index
         }
       })
+    } else if (!this.fill && this.opt) {
+      let tmp = this.array.filter(item => item.questionId === this.opt.relatedQuesGroupID)
+      this.question = this.opt.quesId
+      this.$refs.input.value = this.opt.quesSn
+      this.$refs.attention.value = this.opt.attention
+      this.$emit('groupChange', this.opt.relatedQuesGroupID)
+      this.$refs.host.value = this.opt.quesText.split('____________')[0]
+      this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
     }
   },
   methods: {
+    showFunc () {
+      this.tmpSelected = this.$refs.host.value
+      this.reWriteName = 'pkuInput'
+      this.$nextTick(() => {
+        if (this.opt) {
+          this.$refs.host.value = this.tmpSelected
+        } else {
+          // let tmp = this.questions.filter(item => item.questionId === this.question)
+          // this.$refs.host.value = '访员是否提问了 ' + tmp[0].quesText + ' 一题相关内容？'
+          this.$refs.host.value = this.tmpSelected
+        }
+      })
+    },
+    submitFunc () {
+      let title = this.$refs.host.value
+      this.reWriteName = 'pkuSelect'
+      this.$nextTick(() => {
+        if (this.opt) {
+          this.$refs.host.value = title
+        } else {
+          this.$refs.host.value = title
+          // let tmp = this.questions.filter(item => item.questionId === this.question)
+          // this.$refs.host.value = '访员是否提问了 ' + tmp[0].quesText + ' 一题相关内容？'
+        }
+      })
+      this.tmpSelected = ''
+    },
+    cancelFunc () {
+      this.reWriteName = 'pkuSelect'
+      this.$nextTick(() => {
+        if (this.opt) {
+          // this.$refs.host.value = this.opt.quesText.split('____________')[0]
+          this.$refs.host.value = this.tmpSelected
+        } else {
+          // let tmp = this.questions.filter(item => item.questionId === this.question)
+          // this.$refs.host.value = '访员是否提问了 ' + tmp[0].quesText + ' 一题相关内容？' || '访员是否提问了下面这一题相关内容？'
+          this.$refs.host.value = this.tmpSelected
+        }
+      })
+    },
     onInputEventHandler (val) {
       this.inputSn = val
     },
@@ -124,42 +217,40 @@ export default {
       if (val) {
         this.group = val
         this.groupID++
+        if (this.reWrite) {
+          this.reWriteName = 'pkuSelect'
+        }
+        if (this.opt) {
+          this.$refs.edit.show = false
+          this.$refs.host.value = this.opt.quesText.split('____________')[0]
+        } else {
+          this.$nextTick(() => {
+            this.$refs.host.reset()
+          })
+        }
+        this.question = ''
+        this.questionID = 0
         this.$emit('groupChange', val)
       }
     },
-    // onQuestionEventHandler (val) {
-    //   if (val) {
-    //     this.question = val
-    //     this.questionID++
-    //   }
-    // },
     onQuestionEventHandler (val) {
-      let content = this.questions.filter(item => item.questionId === val)
-      let arr = []
-      if (content[0].optionTexts.length > 0) {
-        content[0].optionTexts.forEach((item, index) => {
-          this.QuesOptionTexts.push(item)
-          this.QuesOptionValues.push(content[0].optionValues[index])
-          arr.push({
-            key: content[0].optionValues[index],
-            name: item
-          })
-        })
-      }
       if (val) {
         this.question = val
         this.questionID++
-        this.inputOptions = arr.concat()
+        this.$refs.host.value = this.$refs.host.value + ' 一题，答案是否一致？'
       }
     },
     onSubmitEventHandler () {
       let content = this.questions.filter(item => item.questionId === this.question)
       this.$emit('callback', {
-        'QuesOptionValues': this.QuesOptionValues.toString(),
-        'QuesOptionTexts': this.QuesOptionTexts.toString(), 
-        'questionID': this.question, 
-        'questionContent': content[0].quesText + ' 这一题，受访者给出的答案是什么？', 
-        'questionSn': this.inputSn, 
+        'type': this.opt ? 'put' : 'post',
+        'QuesOptionValues': '1,5,9',
+        'QuesOptionTexts': '是,否,无法判断',
+        'questionID': this.question,
+        'questionContent': this.$refs.host.value,
+        'questionSn': this.inputSn,
+        'cid': this.cid,
+        'rid': this.rid,
         'QuesType': '3009',
         'attention': this.attention
       })
@@ -171,7 +262,7 @@ export default {
 .wrap-input, .wrap-select {
   margin-bottom: 20px;
 }
-div.don-qa-question-cs-j >>> .don-qa-question-wrap label {
+div.don-qa-question-cs-i >>> .don-qa-question-wrap label {
   font-size: 14px;
 }
 </style>

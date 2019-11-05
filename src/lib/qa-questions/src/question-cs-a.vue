@@ -102,7 +102,10 @@ export default {
       }
     },
     opt: {
-      type: Object
+      type: Object,
+      default () {
+        return null
+      }
     }
   },
   data () {
@@ -121,30 +124,30 @@ export default {
   },
   watch: {
     array (val) {
-      console.log('opt', this.opt, val)
       if (this.opt) {
         let tmp = val.filter(item => item.questionId === this.opt.relatedQuesGroupID)
         this.question = this.opt.quesId
-        // this.question = this.opt.quesText.split('____________')[1]
+        this.question = this.opt.quesText.split('____________')[1]
         this.cid = this.opt.quesText.split('____________')[1]
         this.$refs.input.value = this.opt.quesSn
+        this.$refs.attention.value = this.opt.attention
         this.$emit('groupChange', this.opt.relatedQuesGroupID)
         this.$refs.host.value = this.opt.quesText.split('____________')[0]
-        this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
+        this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无'
       }
     },
     opt (val) {
-      console.log('opt1', this.opt, val)
       if (this.array) {
         let tmp = this.array.filter(item => item.questionId === this.opt.relatedQuesGroupID)
         this.question = this.opt.quesId
         this.$refs.input.value = this.opt.quesSn
+        this.$refs.attention.value = this.opt.attention
         this.$emit('groupChange', this.opt.relatedQuesGroupID)
         this.$refs.host.value = this.opt.quesText.split('____________')[0]
         this.cid = this.opt.quesText.split('____________')[1].split('[')[0]
         this.rid = this.opt.quesText.split('[')[1].split(']')[0]
         console.log(this.rid)
-        this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
+        this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无'
       }
     }
   },
@@ -155,6 +158,15 @@ export default {
           this.$children[0].$data.value = index
         }
       })
+    } else if (!this.fill && this.opt) {
+      let tmp = val.filter(item => item.questionId === this.opt.relatedQuesGroupID)
+      this.question = this.opt.quesId
+      this.$refs.input.value = this.opt.quesSn
+      this.$refs.attention.value = this.opt.attention
+      this.$refs.host.value = this.opt.quesText.split('____________')[0]
+      this.cid = this.opt.quesText.split('____________')[1].split('[')[0]
+      this.rid = this.opt.quesText.split('[')[1].split(']')[0]
+      this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无'
     }
   },
   methods: {

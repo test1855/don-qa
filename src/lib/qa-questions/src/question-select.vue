@@ -171,22 +171,30 @@ export default {
           this.$children[0].$data.value = index
         }
       })
-    } else {
-      this.$refs.t1.$children[0].$data.value = this.opt.quesText
-      this.$refs.t2.$children[0].$data.value = this.opt.quesSn
+    } else if (!this.fill) {
       this.selects = []
-      this.opt.quesOptions.forEach((item, id) => {
-        this.selects.push({
-          sn: item,
-          val: this.opt.quesOptionTexts[id]
-        })
-      })
-      this.$nextTick(() => {
+      if (this.opt) {
+        this.$refs.t1.$children[0].$data.value = this.opt.quesSn
+        this.$refs.t2.$children[0].$data.value = this.opt.quesText.split('____________')[0]
         this.opt.quesOptions.forEach((item, id) => {
-          this.$refs.t3.$children[id].$children[0].$data.value = item
-          this.$refs.t3.$children[id].$children[1].$data.value = this.opt.quesOptionTexts[id]
+          this.selects.push({
+            sn: item,
+            val: this.opt.quesOptionTexts[id]
+          })
         })
-      })
+        this.selecttype = this.opt.quesOptionsWithoutInput
+        console.log('selecttype', this.selecttype)
+        this.$refs.t3.$children.forEach((item, id) => {
+          item.$children[2].value = this.selecttype[id]
+        })
+        this.$refs.attention.value = this.opt.attention
+        this.$nextTick(() => {
+          this.opt.quesOptions.forEach((item, id) => {
+            this.$refs.t3.$children[id].$children[0].$data.value = item
+            this.$refs.t3.$children[id].$children[1].$data.value = this.opt.quesOptionTexts[id]
+          })
+        })
+      }
     }
   },
   watch: {
@@ -262,7 +270,12 @@ export default {
     },
     onSelectEventHandler (val, index, type) {
       if (type === 'checktype') {
-        this.selecttype[index] = val
+        if (index < this.selecttype.length) {
+          this.selecttype[index] = val
+        } else {
+          while (index !== this.selecttype.length - 1)
+            this.selecttype.push(true)
+        }
       }
       this.selects[index][type] = val
     },
@@ -350,6 +363,7 @@ export default {
       })
       // console.log(this.inputTitle)
       this.$emit('callback', {
+        'type': this.opt ? 'put' : 'post',
         'QuesOptionValues': sns.toString(),
         'QuesOptionTexts': value.toString(),
         'optionWithoutInput': ctype.toString(),

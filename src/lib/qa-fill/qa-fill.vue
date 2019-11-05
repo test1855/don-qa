@@ -27,8 +27,9 @@
           <component v-else-if="item.quesType === '3007'" v-bind:is='"donQuestionCsH"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '3008'" v-bind:is='"donQuestionCsI"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '3009'" v-bind:is='"donQuestionCsJ"' :options="eachOption(item)" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
-          <component v-else-if="item.quesType === '0100'" importType="0100" v-bind:is='"donQuestionInput"' :disflag="item.quesText.indexOf('显示') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
-          <component v-else-if="item.quesType === '0102'" importType="0102" v-bind:is='"donQuestionInput"' :disflag="item.quesText.indexOf('显示') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
+          <component v-else-if="item.quesType === '0100'" importType="0100" v-bind:is='"donQuestionInput"' :minval="item.minCharacter" :maxval="item.maxCharacter" :disflag="item.quesText!==undefined&&item.quesText.indexOf('显示') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
+          <component v-else-if="item.quesType === '0102'" importType="0102" v-bind:is='"donQuestionInput"' :disflag="item.quesText!==undefined&&item.quesText.indexOf('显示') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
+          <component v-else-if="item.quesType === '0103'" importType="0103" v-bind:is='"donQuestionInput"' :minval="item.minCharacter" :maxval="item.maxCharacter" :disflag="item.quesText!==undefined&&item.quesText.indexOf('显示') !== -1" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '0600' || item.quesType ==='0601'" v-bind:is='"donQuestionRate"' :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component> 
           <component v-else-if="item.quesType === '0001'" v-bind:is='"donQuestionSelect"' :options="eachOption(item)" :res="eachRes(index1, index2)" :fill="true" :disabled="false" ref="res"></component>
           <!-- <component v-else></component> -->
@@ -159,7 +160,7 @@ export default {
       if (item.quesType === '3008') {
         return title.split('____________')[0] + '<strong><span style=\"background-color: rgb(255, 255, 0);\">【调查问卷答案】' + item.quesAnswer + '</span></strong>' + '<br><strong><span style=\"background-color: LightSkyBlue;\">【核查员注意】' + item.attention + '</span></strong>'
       }
-      return title.split('____________')[0] + '<br><strong><span style=\"background-color: blue;\">【核查员注意】' + item.attention + '</span></strong>'
+      return title.split('____________')[0] + '<br><strong><span style=\"background-color: LightSkyBlue;\">【核查员注意】' + item.attention + '</span></strong>'
     },
     onPrevEventHandler () {
       this.$emit('prev')
@@ -184,7 +185,7 @@ export default {
         let name = singleQuestion.$options.name
         if (name === 'donQuestionInput') {
           if (!singleQuestion.disflag && singleQuestion.$children[0]) {
-            if (singleQuestion.$children[0].$data.value.length === 0) {
+            if (singleQuestion.$children[0].$data.value === undefined || singleQuestion.$children[0].$data.value.length === 0) {
               tmpCount++
             }
           }
@@ -258,7 +259,7 @@ export default {
               // })
               // val.optionsInput = inputtext
               res.push(val)
-            } else if (val.quesType === '0100') {
+            } else if (val.quesType === '0100' || val.quesType === '0103') {
               let num = '显示'
               if (!this.$refs.res[count].disflag) {
                 num = this.$refs.res[count].$children[0].$data.value

@@ -1,6 +1,6 @@
 <template>
   <div class="don-qa-question-cs-i" v-if="!fill">
-    <don-qa-question-wrap label="题目序号" ref="title1">
+    <don-qa-question-wrap label="题目序号">
       <pku-input
         class="wrap-input"
         ref="input"
@@ -101,7 +101,10 @@ export default {
       }
     },
     opt: {
-      type: Object
+      type: Object,
+      default () {
+        return null
+      }
     }
   },
   data () {
@@ -120,24 +123,22 @@ export default {
   },
   watch: {
     array (val) {
-      console.log('opt', this.opt, val)
       if (this.opt) {
         let tmp = val.filter(item => item.questionId === this.opt.relatedQuesGroupID)
         this.question = this.opt.quesId
-        console.log(this.$refs, this, 234)
         this.$refs.input.value = this.opt.quesSn
-        this.$refs.title1.$children[0].$data.value = this.opt.quesSn
+        this.$refs.attention.value = this.opt.attention
         this.$emit('groupChange', this.opt.relatedQuesGroupID)
         this.$refs.host.value = this.opt.quesText.split('____________')[0]
         this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
       }
     },
     opt (val) {
-      console.log('opt1', this.opt, val)
       if (this.array) {
         let tmp = this.array.filter(item => item.questionId === this.opt.relatedQuesGroupID)
         this.question = this.opt.quesId
         this.$refs.input.value = this.opt.quesSn
+        this.$refs.attention.value = this.opt.attention
         this.$emit('groupChange', this.opt.relatedQuesGroupID)
         this.$refs.host.value = this.opt.quesText.split('____________')[0]
         this.cid = this.opt.quesText.split('____________')[1].split('[')[0]
@@ -154,12 +155,11 @@ export default {
           this.$children[0].$data.value = index
         }
       })
-      console.log(234)
-    } else {
-      console.log(111)
+    } else if (!this.fill && this.opt) {
       let tmp = this.array.filter(item => item.questionId === this.opt.relatedQuesGroupID)
       this.question = this.opt.quesId
       this.$refs.input.value = this.opt.quesSn
+      this.$refs.attention.value = this.opt.attention
       this.$emit('groupChange', this.opt.relatedQuesGroupID)
       this.$refs.host.value = this.opt.quesText.split('____________')[0]
       this.$refs.group.value = tmp[0] ? tmp[0].quesText : '无此QuestionGroup'
